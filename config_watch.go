@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -20,13 +21,12 @@ func Watch(path string, configs chan<- *Config, errors chan<- error, done <-chan
 					break loop
 				}
 				// getting rename, chmod, remove event when editing conf on linux
-				if event.Op&(fsnotify.Write|fsnotify.Rename) > 0 {
+				if event.Op&(fsnotify.Write) > 0 && filepath.Base(event.Name) == filepath.Base(path) {
 					c, err := ReadConfig(path)
 					if err != nil {
 						errors <- err
 						continue loop
 					}
-					fmt.Println("new conf")
 					configs <- c
 				}
 			case err, ok := <-watcher.Errors:
@@ -42,7 +42,9 @@ func Watch(path string, configs chan<- *Config, errors chan<- error, done <-chan
 		// ignore close error
 		watcher.Close()
 	}()
-	err = watcher.Add(path)
+	dir := filepath.Dir(path)
+	// watch the dir atomic write of text editor gives rename, chmod, remove events; remove stops the watch
+	err = watcher.Add(dir)
 	if err != nil {
 		return err
 	}

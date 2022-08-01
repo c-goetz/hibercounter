@@ -16,21 +16,21 @@ const defaultConfig = `
 		"geiger": {
 			"osc": { "type": "noise" },
 			"env": {
-				"attackSamples": 44100,
+				"attackSeconds": 1,
 				"attackValue": 1,
-				"decaySamples": 0,
+				"decaySeconds": 0,
 				"decayValue": 1,
-				"releaseSamples": 44100
+				"releaseSeconds": 1
 			}
 		},
 		"phone": {
 			"osc": { "type": "sine", "frequency": 425 },
 			"env": {
-				"attackSamples": 44100,
+				"attackSeconds": 0.5,
 				"attackValue": 1,
-				"decaySamples": 0,
+				"decaySeconds": 0,
 				"decayValue": 1,
-				"releaseSamples": 44100
+				"releaseSeconds": 1
 			}
 		}
 	},
@@ -40,6 +40,14 @@ const defaultConfig = `
 	]
 }
 `
+
+type AdrConfig struct {
+	AttackSeconds  float32 `json:"attackSeconds"`
+	AttackValue    float32 `json:"attackValue"`
+	DecaySeconds   float32 `json:"decaySeconds"`
+	DecayValue     float32 `json:"decayValue"`
+	ReleaseSeconds float32 `json:"releaseSeconds"`
+}
 
 type StaticConfig struct {
 	MaxVoices   int  `json:"maxVoices"`

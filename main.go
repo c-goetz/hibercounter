@@ -15,7 +15,8 @@ import (
 )
 
 const sampleRate = 44100
-const attenuate = 0.01
+
+const attenuate = 0.3
 
 var vs voices
 var specs voiceConfigs
@@ -211,16 +212,6 @@ func processLines(done <-chan struct{}, errs chan<- error) {
 }
 
 func main() {
-	osc := sine{440}
-	//	osc := random{}
-	v := newVoice(osc, AdrConfig{
-		sampleRate,
-		1,
-		sampleRate,
-		0.7,
-		sampleRate,
-	})
-	vs.voices = append(vs.voices, &v)
 	configFile := flag.String("config", "", "Path to config, created with defaults if not found.")
 	flag.Parse()
 	if *configFile == "" {

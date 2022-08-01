@@ -9,16 +9,16 @@ type oscillator interface {
 	samples(timeSamples int, numSamples int) []float32
 }
 
-type AdrConfig struct {
-	AttackSamples  int     `json:"attackSamples"`
-	AttackValue    float32 `json:"attackValue"`
-	DecaySamples   int     `json:"decaySamples"`
-	DecayValue     float32 `json:"decayValue"`
-	ReleaseSamples int     `json:"releaseSamples"`
+type adrSampleConfig struct {
+	AttackSamples  int
+	AttackValue    float32
+	DecaySamples   int
+	DecayValue     float32
+	ReleaseSamples int
 }
 
 type adr struct {
-	AdrConfig
+	adrSampleConfig
 	attackSlope   float32
 	decaySlope    float32
 	decayOffset   float32
@@ -39,22 +39,31 @@ func (l line) slope() float32 {
 }
 
 func (c AdrConfig) createAdr() adr {
+	attackSamples := sampleRate * c.AttackSeconds
 	attack := line{
 		point{0, 0},
-		point{float32(c.AttackSamples), c.AttackValue},
+		point{attackSamples, c.AttackValue},
 	}
+	decaySamples := sampleRate * c.DecaySeconds
 	decay := line{
 		attack.end,
-		point{float32(c.AttackSamples + c.DecaySamples), c.DecayValue},
+		point{attack.end.x + decaySamples, c.DecayValue},
 	}
+	releaseSamples := sampleRate * c.ReleaseSeconds
 	release := line{
 		decay.end,
-		point{decay.end.x + float32(c.ReleaseSamples), 0},
+		point{decay.end.x + releaseSamples, 0},
 	}
 	ds := decay.slope()
 	rs := release.slope()
 	return adr{
-		c,
+		adrSampleConfig{
+			int(attackSamples),
+			c.AttackValue,
+			int(decaySamples),
+			c.DecayValue,
+			int(releaseSamples),
+		},
 		attack.slope(),
 		ds,
 		ds*-decay.start.x + decay.start.y,
